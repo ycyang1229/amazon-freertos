@@ -190,6 +190,7 @@ target_include_directories(
     INTERFACE $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${kernel_includes}>
 )
 
+# #YC_TBD, #posix.
 #Posix
 afr_mcu_port(posix)
 

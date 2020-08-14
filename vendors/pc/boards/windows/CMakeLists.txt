@@ -72,6 +72,7 @@ target_link_libraries(
         3rdparty::tracealyzer_recorder
 )
 
+# #YC_TBD, #posix.
 # POSIX
 afr_mcu_port(posix)
 target_sources(
@@ -87,6 +88,7 @@ target_link_libraries(
     INTERFACE AFR::freertos_plus_posix
 )
 
+# #YC_TBD, this is no need for webrtc.
 # PKCS11
 afr_mcu_port(pkcs11_implementation DEPENDS AFR::pkcs11_mbedtls)
 target_sources(
@@ -96,6 +98,7 @@ target_sources(
 )
 
 # FreeRTOS Plus TCP
+# #YC_TBD, #socket.
 afr_mcu_port(freertos_plus_tcp)
 target_sources(
     AFR::freertos_plus_tcp::mcu_port
@@ -103,16 +106,20 @@ target_sources(
         "${AFR_MODULES_FREERTOS_PLUS_DIR}/standard/freertos_plus_tcp/source/portable/BufferManagement/BufferAllocation_2.c"
         "${AFR_MODULES_FREERTOS_PLUS_DIR}/standard/freertos_plus_tcp/source/portable/NetworkInterface/WinPCap/NetworkInterface.c"
 )
+
+# #YC_TBD, #socket.
 target_include_directories(
     AFR::freertos_plus_tcp::mcu_port
     INTERFACE
         "${AFR_MODULES_FREERTOS_PLUS_DIR}/standard/freertos_plus_tcp/source/portable/Compiler/MSVC"
 )
+# #YC_TBD, #socket, this is the portable layer of tcp/ip stack.
 target_link_libraries(
     AFR::freertos_plus_tcp::mcu_port
     INTERFACE 3rdparty::win_pcap
 )
 
+# #YC_TBD, this is no need for webrtc.
 # Secure sockets
 afr_mcu_port(secure_sockets)
 target_link_libraries(

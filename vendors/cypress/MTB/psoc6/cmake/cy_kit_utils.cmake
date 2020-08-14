@@ -439,7 +439,7 @@ function(cy_kit_generate)
 
     # PKCS11
     afr_mcu_port(pkcs11_implementation DEPENDS CyObjStore)
-
+    # #YC_TBD, #mbedtls.
     target_sources(
         afr_3rdparty_mbedtls
         INTERFACE

@@ -27,6 +27,12 @@
 	path = libraries/3rdparty/mbedtls
 	url = https://github.com/ARMmbed/mbedtls.git
 	branch = mbedtls-2.16.7
+
+[submodule "libwebsockets"]
+	path = libraries/3rdparty/libwebsockets
+	url = https://github.com/ycyang1229/libwebsockets
+	branch = afr-v4.1.0-rc1
+
 [submodule "libraries/abstractions/pkcs11/psa"]
 	path = libraries/abstractions/pkcs11/psa
 	url = https://github.com/Linaro/freertos-pkcs11-psa.git

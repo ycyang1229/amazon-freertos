@@ -211,7 +211,7 @@ target_include_directories(
     AFR::kernel::mcu_port
     INTERFACE $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${kernel_includes}>
 )
-
+# #YC_TBD, #posix.
 #Posix
 afr_mcu_port(posix)
 

@@ -203,7 +203,7 @@ target_include_directories(
     AFR::kernel::mcu_port
     INTERFACE $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:${kernel_inc_dirs}>
 )
-
+# #YC_TBD, #posix.
 # POSIX
 
 # TODO: Compile error with mcuxpresso tool chain

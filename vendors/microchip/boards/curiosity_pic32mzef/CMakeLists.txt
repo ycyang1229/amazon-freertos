@@ -224,7 +224,7 @@ target_link_libraries(
     AFR::secure_sockets::mcu_port
     INTERFACE AFR::secure_sockets_freertos_plus_tcp
 )
-
+# #YC_TBD, #posix.
 # POSIX
 afr_mcu_port(posix)
 target_sources(

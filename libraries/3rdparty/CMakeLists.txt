@@ -125,7 +125,7 @@ if(EXISTS "${AFR_3RDPARTY_DIR}/lwip_osal" AND NOT "${AFR_BOARD}" STREQUAL "pc.wi
     )
     add_library(3rdparty::lwip_osal ALIAS afr_3rdparty_lwip_osal)
 endif()
-
+# #YC_TBD, #mbedtls.
 # mbedtls - TLS protocol implementation
 if(EXISTS "${AFR_3RDPARTY_DIR}/mbedtls")
     afr_glob_src(mbedtls_library DIRECTORY "${AFR_3RDPARTY_DIR}/mbedtls/library" RECURSE)

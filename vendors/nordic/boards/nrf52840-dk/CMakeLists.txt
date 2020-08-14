@@ -435,7 +435,7 @@ target_link_libraries(
         AFR::crypto
         AFR::ota_mqtt
 )
-
+# #YC_TBD, #posix.
 # POSIX
 afr_mcu_port(posix)
 target_sources(

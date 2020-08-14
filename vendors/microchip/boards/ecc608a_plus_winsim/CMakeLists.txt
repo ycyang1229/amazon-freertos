@@ -67,7 +67,7 @@ target_link_libraries(
     INTERFACE
         3rdparty::tracealyzer_recorder
 )
-
+# #YC_TBD, #posix.
 # POSIX
 afr_mcu_port(posix)
 target_sources(

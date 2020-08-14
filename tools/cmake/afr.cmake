@@ -1,4 +1,5 @@
 # Enable assembly if we're cross compiling.
+# #YC_TBD, #cross-compiling.
 if(CMAKE_CROSSCOMPILING)
     enable_language(ASM)
 endif()
@@ -65,6 +66,7 @@ if(NOT DEFINED CACHE{AFR_TOOLCHAIN})
     set(AFR_TOOLCHAIN ${__toolchain} CACHE INTERNAL "Toolchain to build FreeRTOS.")
 endif()
 
+# #YC_TBD, #demo, the option to control the interface of demo.
 # Provide an option to enable demos. If we're not at top level, turn off demos build by default.
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(AFR_ENABLE_DEMOS "Build demos for FreeRTOS." ON)
@@ -80,6 +82,7 @@ if (AFR_ENABLE_UNIT_TESTS)
      add_compile_definitions(AMAZON_FREERTOS_ENABLE_MOCKING)
 endif()
 
+# #YC_TBD, #test, the option to control the interface of test.
 # Provide an option to enable tests. Also set an helper variable to use in generator expression.
 option(AFR_ENABLE_TESTS "Build tests for FreeRTOS. Requires recompiling whole library." OFF)
 if(AFR_ENABLE_TESTS)
