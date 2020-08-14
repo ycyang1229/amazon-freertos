@@ -280,3 +280,27 @@ if(EXISTS "${AFR_3RDPARTY_DIR}/unity")
     )
     target_compile_definitions(3rdparty::unity INTERFACE UNITY_INCLUDE_CONFIG_H)
 endif()
+
+# #YC_TBD, # #libwebsockets
+if(EXISTS "${AFR_3RDPARTY_DIR}/libwebsockets")
+    afr_glob_src(libwebsockets_library DIRECTORY "${AFR_3RDPARTY_DIR}/libwebsockets/library" RECURSE)
+    afr_glob_src(libwebsockets_include DIRECTORY "${AFR_3RDPARTY_DIR}/libwebsockets/include" RECURSE)
+
+    # Build to static library to save some time.
+    add_library(
+        afr_3rdparty_libwebsockets STATIC EXCLUDE_FROM_ALL
+        ${libwebsockets_library}
+        ${libwebsockets_include}
+    )
+
+    target_include_directories(
+        afr_3rdparty_libwebsockets PUBLIC
+        "${AFR_3RDPARTY_DIR}/libwebsockets/include"
+        "${AFR_3RDPARTY_DIR}/libwebsockets/include/libwebsockets"
+    )
+    target_link_libraries(
+        afr_3rdparty_libwebsockets
+        PRIVATE AFR::kernel
+    )
+    add_library(3rdparty::libwebsockets ALIAS afr_3rdparty_libwebsockets)
+endif()
