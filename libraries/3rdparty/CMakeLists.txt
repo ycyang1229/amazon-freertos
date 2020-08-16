@@ -304,3 +304,115 @@ if(EXISTS "${AFR_3RDPARTY_DIR}/libwebsockets")
     )
     add_library(3rdparty::libwebsockets ALIAS afr_3rdparty_libwebsockets)
 endif()
+
+# #YC_TBD, # #amazon-kinesis-video-streams-pic, kvspicUtils, kvspicState
+if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic")
+    # #amazon-kinesis-video-streams-pic, kvspicUtils
+    afr_glob_src(kvspicUtils_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/src" RECURSE)
+    afr_glob_src(kvspicUtils_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include" RECURSE)
+
+    # Build to static library to save some time.
+    add_library(
+        afr_3rdparty_kvspicUtils STATIC EXCLUDE_FROM_ALL
+        ${kvspicUtils_library}
+        ${kvspicUtils_include}
+    )
+
+    target_include_directories(
+        afr_3rdparty_kvspicUtils PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include"
+    )
+
+    target_link_libraries(
+        afr_3rdparty_kvspicUtils
+        PRIVATE AFR::kernel
+    )
+    add_library(3rdparty::kvspicUtils ALIAS afr_3rdparty_kvspicUtils)
+
+    # #amazon-kinesis-video-streams-pic, kvspicState
+    afr_glob_src(kvspicState_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/src" RECURSE)
+    afr_glob_src(kvspicState_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include" RECURSE)
+
+    # Build to static library to save some time.
+    add_library(
+        afr_3rdparty_kvspicState STATIC EXCLUDE_FROM_ALL
+        ${kvspicState_library}
+        ${kvspicState_include}
+    )
+
+    target_include_directories(
+        afr_3rdparty_kvspicState PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include"
+    )
+
+    target_link_libraries(
+        afr_3rdparty_kvspicState
+        PRIVATE AFR::kernel
+    )
+    add_library(3rdparty::kvspicState ALIAS afr_3rdparty_kvspicState)
+
+endif()
+
+
+
+# #YC_TBD, # #amazon-kinesis-video-streams-producer-c, kvsCommonLws
+if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c")
+    # #amazon-kinesis-video-streams-producer-c, kvsCommonLws
+    afr_glob_src(kvsCommonLws_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/source/Common" RECURSE)
+    afr_glob_src(kvsCommonLws_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/source/Common/Lws" RECURSE)
+    afr_glob_src(kvsCommonLws_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/include" RECURSE)
+
+    # Build to static library to save some time.
+    add_library(
+        afr_3rdparty_kvsCommonLws STATIC EXCLUDE_FROM_ALL
+        ${kvsCommonLws_library}
+        ${kvsCommonLws_include}
+    )
+
+    target_include_directories(
+        afr_3rdparty_kvsCommonLws PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/include"
+    )
+
+    target_link_libraries(
+        afr_3rdparty_kvsCommonLws
+        PRIVATE AFR::kernel
+                3rdparty::mbedtls
+                3rdparty::libwebsockets
+                3rdparty::kvspicUtils
+    )
+
+    add_library(3rdparty::kvsCommonLws ALIAS afr_3rdparty_kvsCommonLws)
+endif()
+
+# #YC_TBD, # #amazon-kinesis-video-streams-webrtc-sdk-c, kvsWebrtcClient, kvsWebrtcSignalingClient
+if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-webrtc-sdk-c")
+    # #amazon-kinesis-video-streams-webrtc-sdk-c, kvsWebrtcSignalingClient
+    afr_glob_src(kvsWebrtcSignalingClient_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-webrtc-sdk-c/src/source/Signaling" RECURSE)
+    afr_glob_src(kvsWebrtcSignalingClient_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-webrtc-sdk-c/src/include" RECURSE)
+
+    # Build to static library to save some time.
+    add_library(
+        afr_3rdparty_kvsWebrtcSignalingClient STATIC EXCLUDE_FROM_ALL
+        ${kvsWebrtcSignalingClient_library}
+        ${kvsWebrtcSignalingClient_include}
+    )
+
+    target_include_directories(
+        afr_3rdparty_kvsWebrtcSignalingClient PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-webrtc-sdk-c/src/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-webrtc-sdk-c/src/source/Signaling"
+    )
+
+    target_link_libraries(
+        afr_3rdparty_kvsWebrtcSignalingClient
+        PRIVATE AFR::kernel
+                3rdparty::mbedtls
+                3rdparty::libwebsockets
+                3rdparty::kvspicUtils
+                3rdparty::kvspicState
+                3rdparty::kvsCommonLws
+    )
+
+    add_library(3rdparty::kvsCommonLws ALIAS afr_3rdparty_kvsCommonLws)
+endif()
