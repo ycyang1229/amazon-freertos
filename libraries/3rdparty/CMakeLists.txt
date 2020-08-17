@@ -283,7 +283,7 @@ endif()
 
 # #YC_TBD, # #libwebsockets
 if(EXISTS "${AFR_3RDPARTY_DIR}/libwebsockets")
-    afr_glob_src(libwebsockets_library DIRECTORY "${AFR_3RDPARTY_DIR}/libwebsockets/library" RECURSE)
+    afr_glob_src(libwebsockets_library DIRECTORY "${AFR_3RDPARTY_DIR}/libwebsockets/lib" RECURSE)
     afr_glob_src(libwebsockets_include DIRECTORY "${AFR_3RDPARTY_DIR}/libwebsockets/include" RECURSE)
 
     # Build to static library to save some time.
