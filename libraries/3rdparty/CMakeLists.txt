@@ -307,19 +307,66 @@ endif()
 
 # #YC_TBD, # #amazon-kinesis-video-streams-pic, kvspicUtils, kvspicState
 if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic")
-    # #amazon-kinesis-video-streams-pic, kvspicUtils
-    afr_glob_src(kvspicUtils_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/src" RECURSE)
+    # common
+    afr_glob_src(kvspicCommon_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/common/include" RECURSE)
+    #client
+    afr_glob_src(kvspicClient_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/client/include" RECURSE)
+    afr_glob_src(kvspicClient_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/client/src" RECURSE)
+    #duration
+    afr_glob_src(kvspicDuration_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/duration/src" RECURSE)
+    #heap
+    afr_glob_src(kvspicHeap_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/heap/include" RECURSE)
+    afr_glob_src(kvspicHeap_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/heap/src" RECURSE)
+    #mkvgen
+    afr_glob_src(kvspicMkvgen_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/mkvgen/include" RECURSE)
+    afr_glob_src(kvspicMkvgen_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/mkvgen/src" RECURSE)
+    #state
+    afr_glob_src(kvspicState_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include" RECURSE)
+    afr_glob_src(kvspicState_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/src" RECURSE)
+    #trace
+    afr_glob_src(kvspicTrace_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/trace/include" RECURSE)
+    afr_glob_src(kvspicTrace_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/trace/src" RECURSE)
+    #utils
     afr_glob_src(kvspicUtils_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include" RECURSE)
+    afr_glob_src(kvspicUtils_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/src" RECURSE)
+    #view 
+    afr_glob_src(kvspicView_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/view/include" RECURSE)
+    afr_glob_src(kvspicView_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/view/src" RECURSE)
+    
+    # #amazon-kinesis-video-streams-pic, kvspicClient
+    add_library(
+        afr_3rdparty_kvspicClient STATIC EXCLUDE_FROM_ALL
+        ${kvspicClient_library}
+        ${kvspicClient_include}
+    )
+    # #YC_TBD, 
+    target_include_directories(
+        afr_3rdparty_kvspicClient PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/client/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/mkvgen/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/view/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/heap/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/common/include"
+    )
 
-    # Build to static library to save some time.
+    target_link_libraries(
+        afr_3rdparty_kvspicClient
+        PRIVATE AFR::kernel
+    )
+    add_library(3rdparty::kvspicClient ALIAS afr_3rdparty_kvspicClient)
+
+    # #amazon-kinesis-video-streams-pic, kvspicUtils
     add_library(
         afr_3rdparty_kvspicUtils STATIC EXCLUDE_FROM_ALL
         ${kvspicUtils_library}
         ${kvspicUtils_include}
     )
-
+    # #YC_TBD, 
     target_include_directories(
         afr_3rdparty_kvspicUtils PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/common/include"
         "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include"
     )
 
@@ -330,19 +377,20 @@ if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic")
     add_library(3rdparty::kvspicUtils ALIAS afr_3rdparty_kvspicUtils)
 
     # #amazon-kinesis-video-streams-pic, kvspicState
-    afr_glob_src(kvspicState_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/src" RECURSE)
-    afr_glob_src(kvspicState_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include" RECURSE)
-
+    
     # Build to static library to save some time.
     add_library(
         afr_3rdparty_kvspicState STATIC EXCLUDE_FROM_ALL
         ${kvspicState_library}
         ${kvspicState_include}
     )
-
+    # #YC_TBD, 
     target_include_directories(
         afr_3rdparty_kvspicState PUBLIC
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/common/include"
         "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/state/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/mkvgen/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/utils/include"
     )
 
     target_link_libraries(
@@ -358,20 +406,23 @@ endif()
 # #YC_TBD, # #amazon-kinesis-video-streams-producer-c, kvsCommonLws
 if(EXISTS "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c")
     # #amazon-kinesis-video-streams-producer-c, kvsCommonLws
-    afr_glob_src(kvsCommonLws_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/source/Common" RECURSE)
+    afr_glob_src(kvsCommon_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/source/Common" RECURSE)
     afr_glob_src(kvsCommonLws_library DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/source/Common/Lws" RECURSE)
     afr_glob_src(kvsCommonLws_include DIRECTORY "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/include" RECURSE)
 
     # Build to static library to save some time.
     add_library(
         afr_3rdparty_kvsCommonLws STATIC EXCLUDE_FROM_ALL
+        ${kvsCommon_library}
         ${kvsCommonLws_library}
         ${kvsCommonLws_include}
     )
 
+    target_compile_options(afr_3rdparty_kvsCommonLws PUBLIC -DKVS_USE_MBEDTLS -DKVS_BUILD_WITH_LWS)
     target_include_directories(
         afr_3rdparty_kvsCommonLws PUBLIC
         "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-producer-c/src/include"
+        "${AFR_3RDPARTY_DIR}/amazon-kinesis-video-streams-pic/src/client/include"## #YC_TBD, 
     )
 
     target_link_libraries(
