@@ -203,7 +203,7 @@ BaseType_t xReturn;
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
-
+/** #socket, #YC_TBD, */
 void vNetworkSocketsInit( void )
 {
 	vListInitialise( &xBoundUDPSocketsList );

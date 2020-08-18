@@ -309,5 +309,6 @@ void getUserCmd( char * pucUserCmd )
     char cTmp;
 
     scanf( "%c%c", pucUserCmd, &cTmp );
+    printf("%c", cTmp);
 }
 /*-----------------------------------------------------------*/

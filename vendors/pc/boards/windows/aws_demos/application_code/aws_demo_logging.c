@@ -188,6 +188,7 @@ void vLoggingInit( BaseType_t xLogToStdout,
             if( xUDPLoggingUsed != pdFALSE )
             {
                 /* Set the address to which the print messages are sent. */
+                /** #socket, #YC_TBD, */
                 xPrintUDPAddress.sin_port = FreeRTOS_htons( usRemotePort );
                 xPrintUDPAddress.sin_addr = ulRemoteIPAddress;
             }
@@ -242,7 +243,9 @@ void vLoggingInit( BaseType_t xLogToStdout,
     #endif /* ( ipconfigHAS_DEBUG_PRINTF == 1 ) || ( ipconfigHAS_PRINTF == 1 )  */
 }
 /*-----------------------------------------------------------*/
-
+/**
+ * sample code for creating the udp socket.#TC_TBD. #socket.
+*/
 static void prvCreatePrintSocket( void * pvParameter1,
                                   uint32_t ulParameter2 )
 {
@@ -262,6 +265,9 @@ static void prvCreatePrintSocket( void * pvParameter1,
     if( xSocket != FREERTOS_INVALID_SOCKET )
     {
         /* FreeRTOS+TCP decides which port to bind to. */
+        /** setsockopt 
+         * https://man7.org/linux/man-pages/man3/setsockopt.3p.html
+        */
         FreeRTOS_setsockopt(
             xSocket,
             0,

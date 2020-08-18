@@ -197,6 +197,8 @@ void vLoggingInit( BaseType_t xLogToStdout,
              * so create a stream buffer to pass the messages to a Win32 thread, then
              * create the thread itself, along with a Win32 event that can be used to
              * unblock the thread. */
+
+            /** creating win32 thread not freertos task. */
             if( ( xStdoutLoggingUsed != pdFALSE ) || ( xDiskFileLoggingUsed != pdFALSE ) )
             {
                 /* Create the buffer. */

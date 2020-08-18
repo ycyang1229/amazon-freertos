@@ -49,6 +49,7 @@ target_compile_options(
 # FreeRTOS portable layers
 # -------------------------------------------------------------------------------------------------
 # Normally the portable layer for kernel should be vendor's driver code.
+## #YC_TBD, the wrap between freertos and windows.
 afr_mcu_port(kernel)
 target_sources(
     AFR::kernel::mcu_port
@@ -66,6 +67,7 @@ target_include_directories(
         # Need aws_clientcredential.h
         "$<IF:${AFR_IS_TESTING},${AFR_TESTS_DIR},${AFR_DEMOS_DIR}>/include"
 )
+# analyzer for freertos.
 target_link_libraries(
     AFR::kernel::mcu_port
     INTERFACE
@@ -79,10 +81,12 @@ target_sources(
     AFR::posix::mcu_port
     INTERFACE "${afr_ports_dir}/posix/FreeRTOS_POSIX_portable.h"
 )
+# this needs to be added posix related files including the wrap of posix.
 target_include_directories(
     AFR::posix::mcu_port
     INTERFACE "${afr_ports_dir}/posix"
 )
+# this is in the folder of libraries. #YC_TBD.
 target_link_libraries(
     AFR::posix::mcu_port
     INTERFACE AFR::freertos_plus_posix

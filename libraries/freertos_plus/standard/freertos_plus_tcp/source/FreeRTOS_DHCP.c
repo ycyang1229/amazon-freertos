@@ -118,8 +118,8 @@ located. */
 DHCPv4 uses UDP port number  68 for clients and port number  67 for servers.
 */
 #if( ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN )
-	#define dhcpCLIENT_PORT_IPv4	0x4400U
-	#define dhcpSERVER_PORT_IPv4	0x4300U
+	#define dhcpCLIENT_PORT_IPv4	0x4400U///< 68
+	#define dhcpSERVER_PORT_IPv4	0x4300U///< 67
 	#define dhcpCOOKIE				0x63538263UL
 	#define dhcpBROADCAST			0x0080U
 #else
@@ -240,7 +240,7 @@ BaseType_t xReturn;
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
-
+/** #dhcp. */
 void vDHCPProcess( BaseType_t xReset )
 {
 BaseType_t xGivingUp = pdFALSE;
@@ -557,7 +557,7 @@ static void prvCloseDHCPSocket( void )
 	}
 }
 /*-----------------------------------------------------------*/
-
+/** #socket, #YC_TBD, */
 static void prvCreateDHCPSocket( void )
 {
 struct freertos_sockaddr xAddress;
@@ -573,6 +573,12 @@ TickType_t xTimeoutTime = ( TickType_t ) 0;
 
 			/* Ensure the Rx and Tx timeouts are zero as the DHCP executes in the
 			context of the IP task. */
+			/** #socket, #YC_TBD, https://linux.die.net/man/7/socket 
+			 * SO_RCVTIMEO and SO_SNDTIMEO
+			 * If the timeout is set to zero (the default) then the operation will never timeout. 
+			 * Timeouts only have effect for system calls that perform socket I/O (e.g., read(2), recvmsg(2), send(2), sendmsg(2)); 
+			 * timeouts have no effect for select(2), poll(2), epoll_wait(2), and so on.
+			*/
 			( void ) FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_RCVTIMEO, &( xTimeoutTime ), sizeof( TickType_t ) );
 			( void ) FreeRTOS_setsockopt( xDHCPSocket, 0, FREERTOS_SO_SNDTIMEO, &( xTimeoutTime ), sizeof( TickType_t ) );
 

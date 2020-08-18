@@ -48,7 +48,7 @@
 /* Default configuration for all demos. Individual demos can override these below */
 #define democonfigDEMO_STACKSIZE                       ( configMINIMAL_STACK_SIZE * 8 )
 #define democonfigDEMO_PRIORITY                        ( tskIDLE_PRIORITY + 5 )
-#define democonfigNETWORK_TYPES                        ( AWSIOT_NETWORK_TYPE_ETH )
+#define democonfigNETWORK_TYPES                        ( AWSIOT_NETWORK_TYPE_ETH )///< #YC_TBD, the interface of network.
 
 #define democonfigSHADOW_DEMO_NUM_TASKS                ( 1 )
 #define democonfigSHADOW_DEMO_TASK_STACK_SIZE          ( configMINIMAL_STACK_SIZE * 4 )
