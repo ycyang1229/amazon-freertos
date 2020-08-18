@@ -635,10 +635,8 @@ int32_t FreeRTOS_sendmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
     BaseType_t xByteCountTotal = 0;
     BaseType_t xByteCount = 0;
-
-#if( ipconfigUSE_TCP == 1 )
     BaseType_t iov_idx;
-#endif
+    const struct sockaddr * xDestinationAddress;
 
 #if( ipconfigUSE_TCP == 1 )
     if ( prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE )
@@ -661,7 +659,25 @@ int32_t FreeRTOS_sendmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     else
 #endif  /* ipconfigUSE_TCP == 1 */
     {
-        
+        if ( (msg->msg_name == NULL && msg->msg_namelen == 0) || msg->msg_namelen != sizeof(struct freertos_sockaddr))
+        {
+            return -pdFREERTOS_ERRNO_EINVAL;
+        }
+        xDestinationAddress = ( const struct sockaddr * ) msg->msg_name;
+        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        {
+            xByteCount = FreeRTOS_sendto(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags, xDestinationAddress, sizeof(struct freertos_sockaddr));
+            if (xByteCount >= 0)
+            {
+                xByteCountTotal += xByteCount;
+            }
+            else
+            {
+                xByteCountTotal = xByteCount;
+                break;
+            }
+            flags |= FREERTOS_MSG_DONTWAIT;
+        }
     }
     return xByteCountTotal;
 }
@@ -672,11 +688,7 @@ int32_t FreeRTOS_recvmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
     BaseType_t xByteCountTotal = 0;
     BaseType_t xByteCount = 0;
-    BaseType_t buflen = 0;
-
-#if( ipconfigUSE_TCP == 1 )
     BaseType_t iov_idx;
-#endif
 
 #if( ipconfigUSE_TCP == 1 )
     if (prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE)
@@ -703,7 +715,24 @@ int32_t FreeRTOS_recvmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     else
 #endif
     {
-
+        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        {
+            xByteCount = FreeRTOS_recvfrom(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags, NULL, NULL);
+            if (xByteCount > 0)
+            {
+                xByteCountTotal += xByteCount;
+            }
+            if ((xByteCount < 0) || (xByteCount < msg->msg_iov[iov_idx].iov_len) || (flags & FREERTOS_MSG_PEEK))
+            {
+                if (xByteCount <= 0)
+                {
+                    /* nothing received at all, propagate the error */
+                    xByteCountTotal = xByteCount;
+                }
+                break;
+            }
+            flags |= FREERTOS_MSG_DONTWAIT;
+        }
     }
     return xByteCountTotal;
 }
