@@ -630,6 +630,85 @@ Socket_t xReturn;
 #endif /* ipconfigSUPPORT_SELECT_FUNCTION == 1 */
 /*-----------------------------------------------------------*/
 
+int32_t FreeRTOS_sendmsg(Socket_t xSocket, const struct freertos_msghdr* msg, BaseType_t flags)
+{
+    FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
+    BaseType_t xByteCountTotal = 0;
+    BaseType_t xByteCount = 0;
+
+#if( ipconfigUSE_TCP == 1 )
+    BaseType_t iov_idx;
+#endif
+
+#if( ipconfigUSE_TCP == 1 )
+    if ( prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE )
+    {
+        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        {
+            xByteCount = FreeRTOS_send(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags);
+            if (xByteCount >= 0)
+            {
+                xByteCountTotal += xByteCount;
+            }
+            else
+            {
+                xByteCountTotal = xByteCount;
+                break;
+            }
+            flags |= FREERTOS_MSG_DONTWAIT;
+        }
+    }
+    else
+#endif  /* ipconfigUSE_TCP == 1 */
+    {
+        
+    }
+    return xByteCountTotal;
+}
+/*-----------------------------------------------------------*/
+
+int32_t FreeRTOS_recvmsg(Socket_t xSocket, const struct freertos_msghdr* msg, BaseType_t flags)
+{
+    FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
+    BaseType_t xByteCountTotal = 0;
+    BaseType_t xByteCount = 0;
+    BaseType_t buflen = 0;
+
+#if( ipconfigUSE_TCP == 1 )
+    BaseType_t iov_idx;
+#endif
+
+#if( ipconfigUSE_TCP == 1 )
+    if (prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE)
+    {
+        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        {
+            xByteCount = FreeRTOS_recv(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags);
+            if (xByteCount > 0)
+            {
+                xByteCountTotal += xByteCount;
+            }
+            if ((xByteCount < 0) || (xByteCount < msg->msg_iov[iov_idx].iov_len) || (flags & FREERTOS_MSG_PEEK))
+            {
+                if (xByteCount <= 0)
+                {
+                    /* nothing received at all, propagate the error */
+                    xByteCountTotal = xByteCount;
+                }
+                break;
+            }
+            flags |= FREERTOS_MSG_DONTWAIT;
+        }
+    }
+    else
+#endif
+    {
+
+    }
+    return xByteCountTotal;
+}
+/*-----------------------------------------------------------*/
+
 /*
  * FreeRTOS_recvfrom: receive data from a bound socket
  * In this library, the function can only be used with connectionsless sockets

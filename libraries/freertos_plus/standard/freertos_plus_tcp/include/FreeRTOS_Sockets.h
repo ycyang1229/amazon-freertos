@@ -180,6 +180,25 @@ struct freertos_sockaddr
 	uint32_t sin_addr;
 };
 
+#if !defined(iovec)
+struct freertos_iovec {
+    void* iov_base;
+    size_t iov_len;
+};
+#endif
+
+typedef int32_t freertos_msg_iovlen_t;
+
+struct freertos_msghdr {
+    void* msg_name;
+    socklen_t msg_namelen;
+    struct freertos_iovec* msg_iov;
+    freertos_msg_iovlen_t msg_iovlen;
+    void* msg_control;
+    socklen_t msg_controllen;
+    int msg_flags;
+};
+
 extern const char *FreeRTOS_inet_ntoa( uint32_t ulIPAddress, char *pcBuffer );
 
 #if ipconfigBYTE_ORDER == pdFREERTOS_LITTLE_ENDIAN
@@ -220,6 +239,9 @@ Socket_t FreeRTOS_socket( BaseType_t xDomain, BaseType_t xType, BaseType_t xProt
 int32_t FreeRTOS_recvfrom( Socket_t xSocket, void *pvBuffer, size_t uxBufferLength, BaseType_t xFlags, struct freertos_sockaddr *pxSourceAddress, socklen_t *pxSourceAddressLength );
 int32_t FreeRTOS_sendto( Socket_t xSocket, const void *pvBuffer, size_t uxTotalDataLength, BaseType_t xFlags, const struct freertos_sockaddr *pxDestinationAddress, socklen_t xDestinationAddressLength );
 BaseType_t FreeRTOS_bind( Socket_t xSocket, struct freertos_sockaddr const * pxAddress, socklen_t xAddressLength );
+
+int32_t FreeRTOS_sendmsg(Socket_t sockfd, const struct freertos_msghdr* msg, BaseType_t flags);
+int32_t FreeRTOS_recvmsg(Socket_t sockfd, const struct freertos_msghdr* msg, BaseType_t flags);
 
 /* function to get the local address and IP port */
 size_t FreeRTOS_GetLocalAddress( Socket_t xSocket, struct freertos_sockaddr *pxAddress );
