@@ -36,10 +36,13 @@
 	branch = afr-v4.1.0-rc1
 [submodule "libraries/3rdparty/amazon-kinesis-video-streams-pic"]
 	path = libraries/3rdparty/amazon-kinesis-video-streams-pic
-	url = https://github.com/awslabs/amazon-kinesis-video-streams-pic.git
+	url = https://github.com/ycyang1229/amazon-kinesis-video-streams-pic.git
+	branch = afr-porting
 [submodule "libraries/3rdparty/amazon-kinesis-video-streams-producer-c"]
 	path = libraries/3rdparty/amazon-kinesis-video-streams-producer-c
-	url = https://github.com/awslabs/amazon-kinesis-video-streams-producer-c.git
+	url = https://github.com/ycyang1229/amazon-kinesis-video-streams-producer-c.git
+	branch = afr-porting
 [submodule "libraries/3rdparty/amazon-kinesis-video-streams-webrtc-sdk-c"]
 	path = libraries/3rdparty/amazon-kinesis-video-streams-webrtc-sdk-c
-	url = https://github.com/awslabs/amazon-kinesis-video-streams-webrtc-sdk-c.git
+	url = https://github.com/ycyang1229/amazon-kinesis-video-streams-webrtc-sdk-c.git
+	branch = afr-porting
