@@ -635,22 +635,25 @@ int32_t FreeRTOS_sendmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
     BaseType_t xByteCountTotal = 0;
     BaseType_t xByteCount = 0;
-    BaseType_t iov_idx;
+    BaseType_t xIovIdx;
     const struct sockaddr * xDestinationAddress;
 
 #if( ipconfigUSE_TCP == 1 )
     if ( prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE )
     {
-        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        for (xIovIdx = 0; xIovIdx < msg->msg_iovlen; xIovIdx++)
         {
-            xByteCount = FreeRTOS_send(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags);
-            if (xByteCount >= 0)
+            xByteCount = FreeRTOS_send(xSocket, msg->msg_iov[xIovIdx].iov_base, msg->msg_iov[xIovIdx].iov_len, flags);
+            if (xByteCount > 0)
             {
                 xByteCountTotal += xByteCount;
             }
             else
             {
-                xByteCountTotal = xByteCount;
+                if (xIovIdx == 0)
+                {
+                    xByteCountTotal = xByteCount;
+                }
                 break;
             }
             flags |= FREERTOS_MSG_DONTWAIT;
@@ -664,16 +667,19 @@ int32_t FreeRTOS_sendmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
             return -pdFREERTOS_ERRNO_EINVAL;
         }
         xDestinationAddress = ( const struct sockaddr * ) msg->msg_name;
-        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        for (xIovIdx = 0; xIovIdx < msg->msg_iovlen; xIovIdx++)
         {
-            xByteCount = FreeRTOS_sendto(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags, xDestinationAddress, sizeof(struct freertos_sockaddr));
-            if (xByteCount >= 0)
+            xByteCount = FreeRTOS_sendto(xSocket, msg->msg_iov[xIovIdx].iov_base, msg->msg_iov[xIovIdx].iov_len, flags, xDestinationAddress, sizeof(struct freertos_sockaddr));
+            if (xByteCount > 0)
             {
                 xByteCountTotal += xByteCount;
             }
             else
             {
-                xByteCountTotal = xByteCount;
+                if (xIovIdx == 0)
+                {
+                    xByteCountTotal = xByteCount;
+                }
                 break;
             }
             flags |= FREERTOS_MSG_DONTWAIT;
@@ -688,21 +694,42 @@ int32_t FreeRTOS_recvmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     FreeRTOS_Socket_t* pxSocket = (FreeRTOS_Socket_t*)xSocket;
     BaseType_t xByteCountTotal = 0;
     BaseType_t xByteCount = 0;
-    BaseType_t iov_idx;
+    BaseType_t xIovIdx = 0;
+    BaseType_t xBufLen = 0;
+    BaseType_t xBytesLeft = 0;
+    uint8_t * puBuf;
+    uint8_t* puBufSrc;
+    NetworkBufferDescriptor_t* pxNetworkBuffer;
+
+    if ( msg->msg_iovlen <= 0 )
+    {
+        return -pdFREERTOS_ERRNO_EINVAL;
+    }
+
+    /* validate vectors */
+    xBufLen = 0;
+    for (xIovIdx = 0; xIovIdx < msg->msg_iovlen; xIovIdx++)
+    {
+        if ( (msg->msg_iov[xIovIdx].iov_base == NULL) || (msg->msg_iov[xIovIdx].iov_len <= 0) || (xBufLen + msg->msg_iov[xIovIdx].iov_len <= 0) )
+        {
+            return -pdFREERTOS_ERRNO_EINVAL;
+        }
+        xBufLen += msg->msg_iov[xIovIdx].iov_len;
+    }
 
 #if( ipconfigUSE_TCP == 1 )
     if (prvValidSocket(pxSocket, FREERTOS_IPPROTO_TCP, pdTRUE) == pdTRUE)
     {
-        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        for (xIovIdx = 0; xIovIdx < msg->msg_iovlen; xIovIdx++)
         {
-            xByteCount = FreeRTOS_recv(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags);
+            xByteCount = FreeRTOS_recv(xSocket, msg->msg_iov[xIovIdx].iov_base, msg->msg_iov[xIovIdx].iov_len, flags);
             if (xByteCount > 0)
             {
                 xByteCountTotal += xByteCount;
             }
-            if ((xByteCount < 0) || (xByteCount < msg->msg_iov[iov_idx].iov_len) || (flags & FREERTOS_MSG_PEEK))
+            else
             {
-                if (xByteCount <= 0)
+                if (xIovIdx == 0)
                 {
                     /* nothing received at all, propagate the error */
                     xByteCountTotal = xByteCount;
@@ -715,23 +742,68 @@ int32_t FreeRTOS_recvmsg(Socket_t xSocket, const struct freertos_msghdr* msg, Ba
     else
 #endif
     {
-        for (iov_idx = 0; iov_idx < msg->msg_iovlen; iov_idx++)
+        /* Use peek to receive data into UDP packet list */
+        xByteCount = FreeRTOS_recvfrom(xSocket, NULL, 0, FREERTOS_MSG_PEEK, NULL, NULL);
+        if ( (BaseType_t)listCURRENT_LIST_LENGTH(&(pxSocket->u.xUDP.xWaitingPacketsList)) != 0 )
         {
-            xByteCount = FreeRTOS_recvfrom(xSocket, msg->msg_iov[iov_idx].iov_base, msg->msg_iov[iov_idx].iov_len, flags, NULL, NULL);
-            if (xByteCount > 0)
+            taskENTER_CRITICAL();
+            /* The owner of the list item is the network buffer. */
+            pxNetworkBuffer = ipPOINTER_CAST(NetworkBufferDescriptor_t*, listGET_OWNER_OF_HEAD_ENTRY(&(pxSocket->u.xUDP.xWaitingPacketsList)));
+            taskEXIT_CRITICAL();
+            xByteCount = (int32_t)(pxNetworkBuffer->xDataLength - sizeof(UDPPacket_t));
+        }
+
+        if (xByteCount > 0)
+        {
+            if ( xByteCount <= msg->msg_iov[0].iov_len )
             {
-                xByteCountTotal += xByteCount;
+                xByteCount = FreeRTOS_recvfrom(xSocket, msg->msg_iov[0].iov_base, msg->msg_iov[0].iov_len, flags, NULL, NULL);
+                xByteCountTotal = xByteCount;
             }
-            if ((xByteCount < 0) || (xByteCount < msg->msg_iov[iov_idx].iov_len) || (flags & FREERTOS_MSG_PEEK))
+            else
             {
-                if (xByteCount <= 0)
+                /* we need a temporal buffer to receive data */
+                if (xBufLen > xByteCount)
                 {
-                    /* nothing received at all, propagate the error */
-                    xByteCountTotal = xByteCount;
+                    xBufLen = xByteCount;
                 }
-                break;
+                puBuf = (uint8_t *) malloc (xBufLen);
+                if (puBuf == NULL)
+                {
+                    return -pdFREERTOS_ERRNO_ENOMEM;
+                }
+                else
+                {
+                    puBufSrc = puBuf;
+                    xByteCount = FreeRTOS_recvfrom(xSocket, puBufSrc, xBufLen, flags, NULL, NULL);
+                    if (xByteCount > 0)
+                    {
+                        xBytesLeft = xByteCount;
+                        for (xIovIdx = 0; xIovIdx < msg->msg_iovlen; xIovIdx++)
+                        {
+                            xByteCount = (xBytesLeft > msg->msg_iov[xIovIdx].iov_len) ? (msg->msg_iov[xIovIdx].iov_len) : (xBytesLeft);
+                            memcpy(msg->msg_iov[xIovIdx].iov_base, puBufSrc, xByteCount);
+                            puBufSrc += xByteCount;
+                            xByteCountTotal += xByteCount;
+                            xBytesLeft -= xByteCount;
+                            if (xBytesLeft <= 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        /* propagate the error */
+                        xByteCountTotal = xByteCount;
+                    }
+                    free(puBuf);
+                }
             }
-            flags |= FREERTOS_MSG_DONTWAIT;
+        }
+        else
+        {
+            xByteCountTotal = xByteCount;
         }
     }
     return xByteCountTotal;
